@@ -6,7 +6,7 @@
   <title>宠物管理系统 - 萌宠家园</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    
+
     :root {
       --primary: #6C5CE7;
       --secondary: #A29BFE;
@@ -17,15 +17,19 @@
       --shadow: rgba(108, 92, 231, 0.15);
       --danger: #FF6B6B;
       --success: #00B894;
+      --warning: #FDCB6E;
+      --health-good: #00B894;
+      --health-attention: #FDCB6E;
+      --health-poor: #FF6B6B;
     }
-    
+
     body {
       font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
     }
-    
+
     /* 头部 */
     .header {
       background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -38,7 +42,13 @@
       top: 0;
       z-index: 100;
     }
-    
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
     .logo {
       font-size: 1.6rem;
       font-weight: bold;
@@ -47,7 +57,12 @@
       align-items: center;
       gap: 10px;
     }
-    
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+
     .add-pet-btn {
       background: white;
       color: var(--primary);
@@ -62,12 +77,42 @@
       gap: 8px;
       transition: transform 0.2s, box-shadow 0.2s;
     }
-    
+
     .add-pet-btn:hover {
       transform: scale(1.05);
       box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
-    
+
+    .app-manage-btn {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 2px solid rgba(255,255,255,0.4);
+      padding: 12px 20px;
+      border-radius: 25px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .app-manage-btn:hover {
+      background: rgba(255,255,255,0.3);
+      border-color: white;
+    }
+
+    .app-badge {
+      background: var(--danger);
+      color: white;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 10px;
+      min-width: 18px;
+      text-align: center;
+    }
+
     /* 搜索工具栏 */
     .toolbar {
       padding: 20px 30px;
@@ -76,13 +121,13 @@
       flex-wrap: wrap;
       align-items: center;
     }
-    
+
     .search-box {
       flex: 1;
       min-width: 250px;
       position: relative;
     }
-    
+
     .search-box input {
       width: 100%;
       padding: 12px 20px 12px 45px;
@@ -91,12 +136,12 @@
       font-size: 1rem;
       transition: border-color 0.3s;
     }
-    
+
     .search-box input:focus {
       outline: none;
       border-color: var(--primary);
     }
-    
+
     .search-box::before {
       content: "🔍";
       position: absolute;
@@ -104,7 +149,7 @@
       top: 50%;
       transform: translateY(-50%);
     }
-    
+
     .filter-btn {
       background: white;
       border: 2px solid var(--primary);
@@ -114,40 +159,72 @@
       cursor: pointer;
       font-weight: 500;
       transition: all 0.3s;
+      white-space: nowrap;
     }
-    
+
     .filter-btn.active,
     .filter-btn:hover {
       background: var(--primary);
       color: white;
     }
-    
+
+    .filter-btn-health {
+      border-color: var(--health-good);
+      color: var(--health-good);
+    }
+
+    .filter-btn-health.active,
+    .filter-btn-health:hover {
+      background: var(--health-good);
+      color: white;
+    }
+
+    .filter-btn-health.active-health-attention {
+      background: var(--health-attention);
+      border-color: var(--health-attention);
+      color: white;
+    }
+
+    .filter-btn-health.active-health-poor {
+      background: var(--health-poor);
+      border-color: var(--health-poor);
+      color: white;
+    }
+
+    .toolbar-divider {
+      width: 1px;
+      height: 30px;
+      background: #DDD;
+      margin: 0 5px;
+    }
+
     /* 宠物卡片网格 */
     .container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 20px 30px;
     }
-    
+
     .pets-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 25px;
     }
-    
+
     .pet-card {
       background: var(--card-bg);
       border-radius: 20px;
       overflow: hidden;
       box-shadow: 0 5px 20px var(--shadow);
       transition: transform 0.3s, box-shadow 0.3s;
+      position: relative;
     }
-    
+
     .pet-card:hover {
       transform: translateY(-8px);
       box-shadow: 0 12px 30px var(--shadow);
     }
-    
+
     .pet-image {
       height: 200px;
       display: flex;
@@ -155,16 +232,47 @@
       justify-content: center;
       font-size: 5rem;
       background: linear-gradient(135deg, #F0EBFF, #E8E4FF);
+      position: relative;
     }
-    
+
     .pet-card.adopted .pet-image {
       background: linear-gradient(135deg, #FFF5F5, #FFE8E8);
     }
-    
+
+    .health-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .health-good-bg { background: var(--health-good); }
+    .health-attention-bg { background: var(--health-attention); color: #333; }
+    .health-poor-bg { background: var(--health-poor); }
+
+    .pending-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: var(--warning);
+      color: #333;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
     .pet-info {
       padding: 20px;
     }
-    
+
     .pet-name {
       font-size: 1.3rem;
       font-weight: 600;
@@ -173,30 +281,30 @@
       align-items: center;
       gap: 8px;
     }
-    
+
     .pet-status {
       font-size: 0.75rem;
       padding: 3px 10px;
       border-radius: 15px;
       font-weight: 500;
     }
-    
+
     .status-available {
       background: #E8FFF5;
       color: var(--success);
     }
-    
+
     .status-adopted {
       background: #FFE8E8;
       color: var(--danger);
     }
-    
+
     .pet-desc {
       font-size: 0.9rem;
       color: #888;
       margin-bottom: 12px;
     }
-    
+
     .pet-meta {
       display: flex;
       gap: 15px;
@@ -204,18 +312,19 @@
       font-size: 0.85rem;
       color: #666;
     }
-    
+
     .pet-meta span {
       display: flex;
       align-items: center;
       gap: 5px;
     }
-    
+
     .pet-actions {
       display: flex;
-      gap: 10px;
+      gap: 8px;
+      flex-wrap: wrap;
     }
-    
+
     .adopt-btn {
       flex: 1;
       background: var(--primary);
@@ -227,17 +336,18 @@
       font-weight: 500;
       cursor: pointer;
       transition: background 0.2s;
+      min-width: 60px;
     }
-    
+
     .adopt-btn:hover {
       background: #5B4BD5;
     }
-    
+
     .adopt-btn:disabled {
       background: #CCC;
       cursor: not-allowed;
     }
-    
+
     .return-btn {
       flex: 1;
       background: var(--accent);
@@ -249,12 +359,29 @@
       font-weight: 500;
       cursor: pointer;
       transition: background 0.2s;
+      min-width: 60px;
     }
-    
+
     .return-btn:hover {
       background: #00B5AF;
     }
-    
+
+    .health-btn {
+      background: #A29BFE;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .health-btn:hover {
+      background: #8C84E8;
+    }
+
     .edit-btn {
       background: #74B9FF;
       color: white;
@@ -265,7 +392,7 @@
       cursor: pointer;
       font-size: 1.1rem;
     }
-    
+
     .delete-btn {
       background: var(--danger);
       color: white;
@@ -276,23 +403,23 @@
       cursor: pointer;
       font-size: 1.1rem;
     }
-    
+
     .empty-state {
       text-align: center;
       padding: 60px 20px;
       grid-column: 1 / -1;
     }
-    
+
     .empty-icon {
       font-size: 5rem;
       margin-bottom: 15px;
     }
-    
+
     .empty-text {
       font-size: 1.1rem;
       color: #AAA;
     }
-    
+
     /* 模态框 */
     .modal-overlay {
       position: fixed;
@@ -306,19 +433,22 @@
       justify-content: center;
       z-index: 1000;
     }
-    
+
     .modal-overlay.active {
       display: flex;
     }
-    
+
     .modal {
       background: white;
       border-radius: 20px;
-      width: 450px;
+      width: 520px;
       max-width: 90%;
+      max-height: 85vh;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
-    
+
     .modal-header {
       background: linear-gradient(135deg, var(--primary), var(--secondary));
       color: white;
@@ -326,14 +456,15 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-shrink: 0;
     }
-    
+
     .modal-header h2 {
       display: flex;
       align-items: center;
       gap: 10px;
     }
-    
+
     .modal-close {
       background: rgba(255,255,255,0.2);
       border: none;
@@ -344,21 +475,23 @@
       font-size: 1.2rem;
       cursor: pointer;
     }
-    
+
     .modal-body {
       padding: 25px;
+      overflow-y: auto;
+      flex: 1;
     }
-    
+
     .form-group {
       margin-bottom: 18px;
     }
-    
+
     .form-group label {
       display: block;
       margin-bottom: 6px;
       font-weight: 500;
     }
-    
+
     .form-group input,
     .form-group select,
     .form-group textarea {
@@ -369,26 +502,26 @@
       font-size: 1rem;
       font-family: inherit;
     }
-    
+
     .form-group input:focus,
     .form-group select:focus,
     .form-group textarea:focus {
       outline: none;
       border-color: var(--primary);
     }
-    
+
     .form-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 15px;
     }
-    
+
     .form-actions {
       display: flex;
       gap: 10px;
       margin-top: 25px;
     }
-    
+
     .cancel-btn {
       flex: 1;
       background: #EEE;
@@ -399,7 +532,7 @@
       font-size: 1rem;
       cursor: pointer;
     }
-    
+
     .save-btn {
       flex: 2;
       background: var(--primary);
@@ -411,7 +544,334 @@
       font-weight: 600;
       cursor: pointer;
     }
-    
+
+    .checkbox-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .checkbox-group label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: normal;
+      cursor: pointer;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    /* 健康档案模态框 */
+    .health-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .health-summary-item {
+      background: var(--bg);
+      padding: 12px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .health-summary-item .label {
+      font-size: 0.8rem;
+      color: #888;
+      margin-bottom: 4px;
+    }
+
+    .health-summary-item .value {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .health-status-selector {
+      margin-bottom: 20px;
+    }
+
+    .health-status-selector select {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #EEE;
+      border-radius: 10px;
+      font-size: 1rem;
+    }
+
+    .health-records-title {
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .health-record-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 12px;
+      border-left: 3px solid var(--primary);
+      margin-bottom: 10px;
+      background: var(--bg);
+      border-radius: 0 10px 10px 0;
+    }
+
+    .health-record-item.type-vaccine { border-left-color: var(--success); }
+    .health-record-item.type-deworm { border-left-color: var(--warning); }
+    .health-record-item.type-checkup { border-left-color: var(--primary); }
+    .health-record-item.type-note { border-left-color: var(--secondary); }
+
+    .health-record-info .record-type {
+      font-size: 0.8rem;
+      color: #888;
+      margin-bottom: 2px;
+    }
+
+    .health-record-info .record-date {
+      font-size: 0.8rem;
+      color: #AAA;
+    }
+
+    .health-record-info .record-notes {
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+
+    .health-record-delete {
+      background: none;
+      border: none;
+      color: var(--danger);
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 4px;
+    }
+
+    .add-record-form {
+      background: var(--bg);
+      padding: 16px;
+      border-radius: 12px;
+      margin-top: 15px;
+    }
+
+    .add-record-form .form-row {
+      margin-bottom: 12px;
+    }
+
+    /* 侧边栏 */
+    .side-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      z-index: 999;
+    }
+
+    .side-overlay.active {
+      display: block;
+    }
+
+    .side-panel {
+      position: fixed;
+      top: 0;
+      right: -480px;
+      width: 480px;
+      max-width: 90vw;
+      height: 100vh;
+      background: white;
+      box-shadow: -5px 0 30px rgba(0,0,0,0.15);
+      z-index: 1001;
+      transition: right 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .side-panel.open {
+      right: 0;
+    }
+
+    .side-header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .side-header h2 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.2rem;
+    }
+
+    .side-close {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .side-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .app-card {
+      background: var(--bg);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: box-shadow 0.2s;
+    }
+
+    .app-card:hover {
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .app-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .app-card-name {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .app-status {
+      font-size: 0.75rem;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-weight: 500;
+    }
+
+    .app-status-pending {
+      background: #FFF3D6;
+      color: #E17000;
+    }
+
+    .app-status-approved {
+      background: #E8FFF5;
+      color: var(--success);
+    }
+
+    .app-status-rejected {
+      background: #FFE8E8;
+      color: var(--danger);
+    }
+
+    .app-card-sub {
+      font-size: 0.85rem;
+      color: #888;
+      margin-bottom: 4px;
+    }
+
+    .app-card-detail {
+      display: none;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #EEE;
+    }
+
+    .app-card-detail.open {
+      display: block;
+    }
+
+    .app-detail-row {
+      display: flex;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+
+    .app-detail-label {
+      color: #888;
+      width: 100px;
+      flex-shrink: 0;
+    }
+
+    .app-detail-value {
+      color: var(--text);
+    }
+
+    .app-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .app-approve-btn {
+      flex: 1;
+      background: var(--success);
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .app-reject-btn {
+      flex: 1;
+      background: var(--danger);
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .empty-apps {
+      text-align: center;
+      padding: 40px 20px;
+      color: #AAA;
+    }
+
+    .empty-apps-icon {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+
+    /* 状态筛选辅助类 */
+    .filter-btn-health[data-health="good"].active {
+      background: var(--health-good);
+      border-color: var(--health-good);
+      color: white;
+    }
+
+    .filter-btn-health[data-health="attention"].active {
+      background: var(--health-attention);
+      border-color: var(--health-attention);
+      color: white;
+    }
+
+    .filter-btn-health[data-health="poor"].active {
+      background: var(--health-poor);
+      border-color: var(--health-poor);
+      color: white;
+    }
+
     /* Toast */
     .toast {
       position: fixed;
@@ -426,24 +886,24 @@
       z-index: 9999;
       animation: toastFade 2s ease forwards;
     }
-    
+
     @keyframes toastFade {
       0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
       15% { opacity: 1; transform: translateX(-50%) translateY(0); }
       85% { opacity: 1; }
       100% { opacity: 0; }
     }
-    
+
     /* 动画 */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    
+
     .pet-card {
       animation: fadeIn 0.4s ease forwards;
     }
-    
+
     /* 响应式 */
     @media (max-width: 768px) {
       .header { padding: 12px 20px; }
@@ -452,6 +912,11 @@
       .container { padding: 15px 20px; }
       .pets-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
       .form-row { grid-template-columns: 1fr; }
+      .side-panel { width: 100vw; max-width: 100vw; right: -100vw; }
+      .header-actions { gap: 6px; }
+      .add-pet-btn { padding: 10px 16px; font-size: 0.9rem; }
+      .app-manage-btn { padding: 10px 14px; font-size: 0.85rem; }
+      .health-summary { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -459,10 +924,17 @@
 
   <!-- 头部 -->
   <header class="header">
-    <div class="logo">🐾 宠物管理系统</div>
-    <button class="add-pet-btn" onclick="openPetModal()">
-      ➕ 添加宠物
-    </button>
+    <div class="header-left">
+      <div class="logo">🐾 宠物管理系统</div>
+    </div>
+    <div class="header-actions">
+      <button class="app-manage-btn" onclick="openAppPanel()">
+        📋 申请管理 <span class="app-badge" id="appBadge" style="display:none">0</span>
+      </button>
+      <button class="add-pet-btn" onclick="openPetModal()">
+        ➕ 添加宠物
+      </button>
+    </div>
   </header>
 
   <!-- 搜索筛选 -->
@@ -476,6 +948,11 @@
     <button class="filter-btn" data-category="兔">🐰 兔</button>
     <button class="filter-btn" data-category="鸟">🐦 鸟</button>
     <button class="filter-btn" data-category="鱼">🐟 鱼</button>
+    <div class="toolbar-divider"></div>
+    <button class="filter-btn filter-btn-health active" data-health="全部">❤️ 全部</button>
+    <button class="filter-btn filter-btn-health" data-health="good">🟢 健康</button>
+    <button class="filter-btn filter-btn-health" data-health="attention">🟡 待注意</button>
+    <button class="filter-btn filter-btn-health" data-health="poor">🔴 需就医</button>
   </div>
 
   <!-- 宠物列表 -->
@@ -483,7 +960,7 @@
     <div class="pets-grid" id="petsGrid"></div>
   </div>
 
-  <!-- 添加/编辑模态框 -->
+  <!-- 添加/编辑宠物模态框 -->
   <div class="modal-overlay" id="petModal">
     <div class="modal">
       <div class="modal-header">
@@ -528,45 +1005,248 @@
     </div>
   </div>
 
+  <!-- 健康档案模态框 -->
+  <div class="modal-overlay" id="healthModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>📋 健康档案</h2>
+        <button class="modal-close" onclick="closeHealthModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="healthPetInfo" style="font-size:1.1rem;font-weight:600;margin-bottom:15px"></div>
+
+        <div class="health-status-selector">
+          <label style="font-weight:500;display:block;margin-bottom:6px">健康状态</label>
+          <select id="healthStatusSelect" onchange="updateHealthStatus()">
+            <option value="good">🟢 健康</option>
+            <option value="attention">🟡 待注意</option>
+            <option value="poor">🔴 需就医</option>
+          </select>
+        </div>
+
+        <div class="health-summary">
+          <div class="health-summary-item">
+            <div class="label">最近疫苗</div>
+            <div class="value" id="latestVaccine">-</div>
+          </div>
+          <div class="health-summary-item">
+            <div class="label">最近体检</div>
+            <div class="value" id="latestCheckup">-</div>
+          </div>
+        </div>
+
+        <div class="health-records-title">
+          <span>健康记录</span>
+        </div>
+        <div id="healthRecordsList"></div>
+
+        <div class="add-record-form">
+          <div style="font-weight:500;margin-bottom:12px">➕ 添加记录</div>
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom:12px">
+              <label>记录类型</label>
+              <select id="recordType">
+                <option value="vaccine">💉 疫苗</option>
+                <option value="deworm">🪱 驱虫</option>
+                <option value="checkup">🏥 体检</option>
+                <option value="note">📝 备注</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:12px">
+              <label>日期</label>
+              <input type="date" id="recordDate">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:12px">
+            <label>备注</label>
+            <textarea id="recordNotes" rows="2" placeholder="输入备注信息..."></textarea>
+          </div>
+          <button class="save-btn" onclick="addHealthRecord()" style="padding:10px">添加记录</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 领养申请表模态框 -->
+  <div class="modal-overlay" id="appFormModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>📝 领养申请表</h2>
+        <button class="modal-close" onclick="closeAppFormModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom:15px;font-size:0.95rem;color:#666">
+          正在申请领养：<strong id="appFormPetName"></strong>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>姓名 *</label>
+            <input type="text" id="appName" placeholder="您的姓名">
+          </div>
+          <div class="form-group">
+            <label>电话 *</label>
+            <input type="text" id="appPhone" placeholder="手机号码">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>微信号</label>
+          <input type="text" id="appWechat" placeholder="微信号">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>住房类型 *</label>
+            <select id="appHousing">
+              <option value="own">自有住房</option>
+              <option value="rent">租房</option>
+              <option value="other">其他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>阳台封窗</label>
+            <div class="checkbox-group">
+              <label><input type="checkbox" id="appBalcony"> 已封窗</label>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>养宠经验</label>
+            <div class="checkbox-group">
+              <label><input type="checkbox" id="appExperience"> 有养宠经验</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>当前有其他宠物</label>
+            <div class="checkbox-group">
+              <label><input type="checkbox" id="appOtherPets"> 有</label>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>领养理由 *</label>
+          <textarea id="appReason" rows="3" placeholder="请说明您想领养的理由..."></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="cancel-btn" onclick="closeAppFormModal()">取消</button>
+          <button class="save-btn" onclick="submitApplication()">提交申请</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 申请管理侧边栏 -->
+  <div class="side-overlay" id="sideOverlay" onclick="closeAppPanel()"></div>
+  <div class="side-panel" id="sidePanel">
+    <div class="side-header">
+      <h2>📋 申请管理</h2>
+      <button class="side-close" onclick="closeAppPanel()">✕</button>
+    </div>
+    <div class="side-body" id="appListBody"></div>
+  </div>
+
   <script>
-    // 宠物数据
+    // ==================== 数据 ====================
     const PETS = [
-      { id: 1, name: '小白', category: '猫', emoji: '🐱', age: '2岁', desc: '温顺乖巧，喜欢晒太阳', adopted: false },
-      { id: 2, name: '旺财', category: '狗', emoji: '🐶', age: '3岁', desc: '活泼好动，忠诚友善', adopted: false },
-      { id: 3, name: '绒球', category: '兔', emoji: '🐰', age: '1岁', desc: '毛茸茸的，非常可爱', adopted: false },
-      { id: 4, name: '鹦鹉', category: '鸟', emoji: '🦜', age: '2岁', desc: '会说话，聪明伶俐', adopted: false },
-      { id: 5, name: '小金', category: '鱼', emoji: '🐟', age: '1岁', desc: '金桔色，优雅游动', adopted: false },
-      { id: 6, name: '布丁', category: '猫', emoji: '🐱', age: '1岁', desc: '布偶猫，优雅安静', adopted: false },
-      { id: 7, name: '豆豆', category: '狗', emoji: '🐶', age: '2岁', desc: '柯基犬，小短腿', adopted: false },
-      { id: 8, name: '雪球', category: '兔', emoji: '🐰', age: '1岁', desc: '白色长毛，呆萌呆萌', adopted: false }
+      { id: 1, name: '小白', category: '猫', emoji: '🐱', age: '2岁', desc: '温顺乖巧，喜欢晒太阳', adopted: false, healthStatus: 'good', healthRecords: [] },
+      { id: 2, name: '旺财', category: '狗', emoji: '🐶', age: '3岁', desc: '活泼好动，忠诚友善', adopted: false, healthStatus: 'good', healthRecords: [] },
+      { id: 3, name: '绒球', category: '兔', emoji: '🐰', age: '1岁', desc: '毛茸茸的，非常可爱', adopted: false, healthStatus: 'good', healthRecords: [] },
+      { id: 4, name: '鹦鹉', category: '鸟', emoji: '🦜', age: '2岁', desc: '会说话，聪明伶俐', adopted: false, healthStatus: 'good', healthRecords: [] },
+      { id: 5, name: '小金', category: '鱼', emoji: '🐟', age: '1岁', desc: '金桔色，优雅游动', adopted: false, healthStatus: 'good', healthRecords: [] },
+      { id: 6, name: '布丁', category: '猫', emoji: '🐱', age: '1岁', desc: '布偶猫，优雅安静', adopted: false, healthStatus: 'good', healthRecords: [] },
+      { id: 7, name: '豆豆', category: '狗', emoji: '🐶', age: '2岁', desc: '柯基犬，小短腿', adopted: false, healthStatus: 'good', healthRecords: [] },
+      { id: 8, name: '雪球', category: '兔', emoji: '🐰', age: '1岁', desc: '白色长毛，呆萌呆萌', adopted: false, healthStatus: 'good', healthRecords: [] }
     ];
 
     let pets = [];
     let filteredPets = [];
+    let applications = [];
     let currentCategory = '全部';
+    let currentHealthFilter = '全部';
     let editingPetId = null;
+    let healthPetId = null;
+    let appFormPetId = null;
 
     // DOM
     const petsGrid = document.getElementById('petsGrid');
     const petModal = document.getElementById('petModal');
     const searchInput = document.getElementById('searchInput');
 
-    // 初始化
+    // ==================== 初始化 ====================
     function init() {
-      loadPets();
+      loadData();
       renderPets();
       bindEvents();
+      updateAppBadge();
     }
 
-    // 事件绑定
     function bindEvents() {
       searchInput.addEventListener('input', handleSearch);
-      document.querySelectorAll('.filter-btn').forEach(btn => {
+      document.querySelectorAll('.filter-btn[data-category]').forEach(btn => {
         btn.addEventListener('click', () => handleFilter(btn.dataset.category));
+      });
+      document.querySelectorAll('.filter-btn-health').forEach(btn => {
+        btn.addEventListener('click', () => handleHealthFilter(btn.dataset.health));
       });
     }
 
-    // 渲染宠物列表
+    // ==================== 数据持久化 ====================
+    function saveData() {
+      try {
+        localStorage.setItem('petShopData', JSON.stringify(pets));
+        localStorage.setItem('petShopApplications', JSON.stringify(applications));
+      } catch (e) {
+        console.warn('保存失败:', e);
+      }
+    }
+
+    function savePets() {
+      try {
+        localStorage.setItem('petShopData', JSON.stringify(pets));
+      } catch (e) {
+        console.warn('保存失败:', e);
+      }
+    }
+
+    function loadData() {
+      try {
+        const saved = localStorage.getItem('petShopData');
+        if (saved) {
+          pets = JSON.parse(saved);
+          // 数据迁移：为旧数据补充健康字段
+          let migrated = false;
+          pets.forEach(p => {
+            if (!p.healthStatus) {
+              p.healthStatus = 'good';
+              migrated = true;
+            }
+            if (!p.healthRecords) {
+              p.healthRecords = [];
+              migrated = true;
+            }
+          });
+          if (migrated) savePets();
+        } else {
+          pets = JSON.parse(JSON.stringify(PETS));
+        }
+      } catch (e) {
+        pets = JSON.parse(JSON.stringify(PETS));
+      }
+
+      try {
+        const savedApps = localStorage.getItem('petShopApplications');
+        if (savedApps) {
+          applications = JSON.parse(savedApps);
+        } else {
+          applications = [];
+        }
+      } catch (e) {
+        applications = [];
+      }
+
+      filteredPets = [...pets];
+    }
+
+    // ==================== 渲染 ====================
     function renderPets() {
       if (filteredPets.length === 0) {
         petsGrid.innerHTML = `
@@ -578,101 +1258,404 @@
         return;
       }
 
-      petsGrid.innerHTML = filteredPets.map((pet, i) => `
-        <div class="pet-card ${pet.adopted ? 'adopted' : ''}" style="animation-delay: ${i * 0.05}s">
-          <div class="pet-image">${pet.emoji}</div>
-          <div class="pet-info">
-            <div class="pet-name">
-              ${pet.name}
-              <span class="pet-status ${pet.adopted ? 'status-adopted' : 'status-available'}">
-                ${pet.adopted ? '已领养' : '待领养'}
+      petsGrid.innerHTML = filteredPets.map((pet, i) => {
+        const healthLabel = { good: '🟢 健康', attention: '🟡 待注意', poor: '🔴 需就医' };
+        const healthClass = { good: 'health-good-bg', attention: 'health-attention-bg', poor: 'health-poor-bg' };
+        const hasPendingApp = applications.some(a => a.petId === pet.id && a.status === 'pending');
+
+        return `
+          <div class="pet-card ${pet.adopted ? 'adopted' : ''}" style="animation-delay: ${i * 0.05}s">
+            <div class="pet-image">
+              ${pet.emoji}
+              <span class="health-badge ${healthClass[pet.healthStatus] || 'health-good-bg'}">
+                ${healthLabel[pet.healthStatus] || '🟢 健康'}
               </span>
+              ${hasPendingApp ? '<span class="pending-badge">⏳ 审核中</span>' : ''}
             </div>
-            <div class="pet-desc">${pet.desc}</div>
-            <div class="pet-meta">
-              <span>📅 ${pet.age}</span>
-              <span>🏷️ ${pet.category}</span>
-            </div>
-            <div class="pet-actions">
-              ${pet.adopted 
-                ? `<button class="return-btn" onclick="returnPet(${pet.id})">🏠 归还</button>`
-                : `<button class="adopt-btn" onclick="adoptPet(${pet.id})">🤝 领养</button>`
-              }
-              <button class="edit-btn" onclick="editPet(${pet.id})">✏️</button>
-              <button class="delete-btn" onclick="deletePet(${pet.id})">🗑️</button>
+            <div class="pet-info">
+              <div class="pet-name">
+                ${pet.name}
+                <span class="pet-status ${pet.adopted ? 'status-adopted' : 'status-available'}">
+                  ${pet.adopted ? '已领养' : '待领养'}
+                </span>
+              </div>
+              <div class="pet-desc">${pet.desc}</div>
+              <div class="pet-meta">
+                <span>📅 ${pet.age}</span>
+                <span>🏷️ ${pet.category}</span>
+              </div>
+              <div class="pet-actions">
+                ${pet.adopted
+                  ? `<button class="return-btn" onclick="returnPet(${pet.id})">🏠 归还</button>`
+                  : (hasPendingApp
+                      ? `<button class="adopt-btn" disabled>⏳ 审核中</button>`
+                      : `<button class="adopt-btn" onclick="openAppForm(${pet.id})">🤝 领养</button>`)
+                }
+                <button class="health-btn" onclick="openHealthModal(${pet.id})">📋 健康</button>
+                <button class="edit-btn" onclick="editPet(${pet.id})">✏️</button>
+                <button class="delete-btn" onclick="deletePet(${pet.id})">🗑️</button>
+              </div>
             </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
-    // 搜索
+    // ==================== 搜索与筛选 ====================
     function handleSearch(e) {
       const keyword = e.target.value.toLowerCase();
-      filterPets(keyword, currentCategory);
+      filterPets(keyword, currentCategory, currentHealthFilter);
     }
 
-    // 筛选分类
     function handleFilter(category) {
-      document.querySelectorAll('.filter-btn').forEach(btn => {
+      document.querySelectorAll('.filter-btn[data-category]').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.category === category);
       });
       currentCategory = category;
-      filterPets(searchInput.value.toLowerCase(), category);
+      filterPets(searchInput.value.toLowerCase(), category, currentHealthFilter);
     }
 
-    function filterPets(keyword, category) {
+    function handleHealthFilter(health) {
+      document.querySelectorAll('.filter-btn-health').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.health === health);
+      });
+      currentHealthFilter = health;
+      filterPets(searchInput.value.toLowerCase(), currentCategory, health);
+    }
+
+    function filterPets(keyword, category, health) {
       filteredPets = pets.filter(p => {
         const matchKeyword = p.name.toLowerCase().includes(keyword);
         const matchCategory = category === '全部' || p.category === category;
-        return matchKeyword && matchCategory;
+        const matchHealth = health === '全部' || p.healthStatus === health;
+        return matchKeyword && matchCategory && matchHealth;
       });
       renderPets();
     }
 
-    // 领养宠物
+    // ==================== 领养申请 ====================
+    function openAppForm(petId) {
+      const pet = pets.find(p => p.id === petId);
+      if (!pet) return;
+      if (pet.adopted) { alert('这只宠物已经被领养了！'); return; }
+
+      appFormPetId = petId;
+      document.getElementById('appFormPetName').textContent = `${pet.emoji} ${pet.name}`;
+      document.getElementById('appName').value = '';
+      document.getElementById('appPhone').value = '';
+      document.getElementById('appWechat').value = '';
+      document.getElementById('appHousing').value = 'own';
+      document.getElementById('appBalcony').checked = false;
+      document.getElementById('appExperience').checked = false;
+      document.getElementById('appOtherPets').checked = false;
+      document.getElementById('appReason').value = '';
+
+      document.getElementById('appFormModal').classList.add('active');
+    }
+
+    function closeAppFormModal() {
+      document.getElementById('appFormModal').classList.remove('active');
+      appFormPetId = null;
+    }
+
+    function submitApplication() {
+      const name = document.getElementById('appName').value.trim();
+      const phone = document.getElementById('appPhone').value.trim();
+      const wechat = document.getElementById('appWechat').value.trim();
+      const housing = document.getElementById('appHousing').value;
+      const hasBalcony = document.getElementById('appBalcony').checked;
+      const hasExperience = document.getElementById('appExperience').checked;
+      const hasOtherPets = document.getElementById('appOtherPets').checked;
+      const reason = document.getElementById('appReason').value.trim();
+
+      if (!name) { alert('请输入姓名'); return; }
+      if (!phone) { alert('请输入电话'); return; }
+      if (!reason) { alert('请输入领养理由'); return; }
+
+      const newId = applications.length > 0 ? Math.max(...applications.map(a => a.id)) + 1 : 1;
+      applications.push({
+        id: newId,
+        petId: appFormPetId,
+        applicantName: name,
+        applicantPhone: phone,
+        applicantWechat: wechat,
+        housingType: housing,
+        hasBalconyScreen: hasBalcony,
+        hasPetExperience: hasExperience,
+        hasOtherPets: hasOtherPets,
+        reason: reason,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+        reviewedAt: null
+      });
+
+      saveData();
+      closeAppFormModal();
+      renderPets();
+      updateAppBadge();
+      showToast('📝 领养申请已提交，请等待审核');
+    }
+
+    // ==================== 领养/归还 ====================
     function adoptPet(id) {
+      // 旧版直接领养 — 保留但不再从UI调用，改为走申请流程
       const pet = pets.find(p => p.id === id);
       if (!pet) return;
-      
-      if (pet.adopted) {
-        alert('这只宠物已经被领养了！');
-        return false;
-      }
-      
       pet.adopted = true;
       savePets();
       renderPets();
-      showToast(`🎉 ${pet.name} 被领养成功！`);
-      return true;
     }
 
-    // 归还宠物
     function returnPet(id) {
       const pet = pets.find(p => p.id === id);
       if (!pet) return;
-      
       pet.adopted = false;
       savePets();
       renderPets();
       showToast(`🏠 ${pet.name} 已归还宠物店`);
     }
 
-    // 删除宠物
+    // ==================== 申请管理侧边栏 ====================
+    function openAppPanel() {
+      renderAppList();
+      document.getElementById('sideOverlay').classList.add('active');
+      document.getElementById('sidePanel').classList.add('open');
+    }
+
+    function closeAppPanel() {
+      document.getElementById('sideOverlay').classList.remove('active');
+      document.getElementById('sidePanel').classList.remove('open');
+    }
+
+    function renderAppList() {
+      const body = document.getElementById('appListBody');
+      if (applications.length === 0) {
+        body.innerHTML = `
+          <div class="empty-apps">
+            <div class="empty-apps-icon">📋</div>
+            <p>暂无领养申请</p>
+          </div>
+        `;
+        return;
+      }
+
+      const sorted = [...applications].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      body.innerHTML = sorted.map(app => {
+        const pet = pets.find(p => p.id === app.petId);
+        const petName = pet ? `${pet.emoji} ${pet.name}` : '未知宠物';
+        const statusMap = { pending: '⏳ 待审核', approved: '✅ 已批准', rejected: '❌ 已驳回' };
+        const statusClass = { pending: 'app-status-pending', approved: 'app-status-approved', rejected: 'app-status-rejected' };
+        const housingMap = { own: '自有住房', rent: '租房', other: '其他' };
+
+        return `
+          <div class="app-card" onclick="toggleAppDetail(${app.id})">
+            <div class="app-card-header">
+              <span class="app-card-name">${app.applicantName}</span>
+              <span class="app-status ${statusClass[app.status]}">${statusMap[app.status]}</span>
+            </div>
+            <div class="app-card-sub">📞 ${app.applicantPhone}</div>
+            <div class="app-card-sub">🐾 申请领养：${petName}</div>
+            <div class="app-card-detail" id="appDetail_${app.id}">
+              <div class="app-detail-row">
+                <span class="app-detail-label">微信号</span>
+                <span class="app-detail-value">${app.applicantWechat || '-'}</span>
+              </div>
+              <div class="app-detail-row">
+                <span class="app-detail-label">住房类型</span>
+                <span class="app-detail-value">${housingMap[app.housingType] || app.housingType}</span>
+              </div>
+              <div class="app-detail-row">
+                <span class="app-detail-label">阳台封窗</span>
+                <span class="app-detail-value">${app.hasBalconyScreen ? '✅ 是' : '❌ 否'}</span>
+              </div>
+              <div class="app-detail-row">
+                <span class="app-detail-label">养宠经验</span>
+                <span class="app-detail-value">${app.hasPetExperience ? '✅ 有' : '❌ 无'}</span>
+              </div>
+              <div class="app-detail-row">
+                <span class="app-detail-label">其他宠物</span>
+                <span class="app-detail-value">${app.hasOtherPets ? '✅ 有' : '❌ 无'}</span>
+              </div>
+              <div class="app-detail-row">
+                <span class="app-detail-label">领养理由</span>
+                <span class="app-detail-value">${app.reason}</span>
+              </div>
+              <div class="app-detail-row">
+                <span class="app-detail-label">提交时间</span>
+                <span class="app-detail-value">${new Date(app.createdAt).toLocaleString('zh-CN')}</span>
+              </div>
+              ${app.status === 'pending' ? `
+                <div class="app-actions">
+                  <button class="app-approve-btn" onclick="event.stopPropagation(); approveApplication(${app.id})">✅ 批准</button>
+                  <button class="app-reject-btn" onclick="event.stopPropagation(); rejectApplication(${app.id})">❌ 驳回</button>
+                </div>
+              ` : (app.reviewedAt ? `
+                <div class="app-detail-row">
+                  <span class="app-detail-label">审核时间</span>
+                  <span class="app-detail-value">${new Date(app.reviewedAt).toLocaleString('zh-CN')}</span>
+                </div>
+              ` : '')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleAppDetail(id) {
+      const el = document.getElementById('appDetail_' + id);
+      if (el) el.classList.toggle('open');
+    }
+
+    function approveApplication(id) {
+      const app = applications.find(a => a.id === id);
+      if (!app) return;
+
+      app.status = 'approved';
+      app.reviewedAt = new Date().toISOString();
+
+      const pet = pets.find(p => p.id === app.petId);
+      if (pet) {
+        pet.adopted = true;
+      }
+
+      saveData();
+      renderAppList();
+      renderPets();
+      updateAppBadge();
+      showToast(`✅ 已批准 ${app.applicantName} 的领养申请`);
+    }
+
+    function rejectApplication(id) {
+      const app = applications.find(a => a.id === id);
+      if (!app) return;
+
+      app.status = 'rejected';
+      app.reviewedAt = new Date().toISOString();
+
+      saveData();
+      renderAppList();
+      renderPets();
+      updateAppBadge();
+      showToast(`❌ 已驳回 ${app.applicantName} 的领养申请`);
+    }
+
+    function updateAppBadge() {
+      const badge = document.getElementById('appBadge');
+      const count = applications.filter(a => a.status === 'pending').length;
+      if (count > 0) {
+        badge.style.display = 'inline';
+        badge.textContent = count;
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    // ==================== 健康档案 ====================
+    function openHealthModal(petId) {
+      const pet = pets.find(p => p.id === petId);
+      if (!pet) return;
+
+      healthPetId = petId;
+      document.getElementById('healthPetInfo').textContent = `${pet.emoji} ${pet.name} 的健康档案`;
+      document.getElementById('healthStatusSelect').value = pet.healthStatus || 'good';
+      renderHealthRecords(pet);
+      document.getElementById('healthModal').classList.add('active');
+    }
+
+    function closeHealthModal() {
+      document.getElementById('healthModal').classList.remove('active');
+      healthPetId = null;
+    }
+
+    function updateHealthStatus() {
+      const pet = pets.find(p => p.id === healthPetId);
+      if (!pet) return;
+      pet.healthStatus = document.getElementById('healthStatusSelect').value;
+      savePets();
+      renderPets();
+      renderHealthRecords(pet);
+    }
+
+    function renderHealthRecords(pet) {
+      // 摘要
+      const vaccineRec = [...pet.healthRecords].filter(r => r.type === 'vaccine').sort((a, b) => b.date.localeCompare(a.date));
+      const checkupRec = [...pet.healthRecords].filter(r => r.type === 'checkup').sort((a, b) => b.date.localeCompare(a.date));
+      document.getElementById('latestVaccine').textContent = vaccineRec.length > 0 ? vaccineRec[0].date : '无记录';
+      document.getElementById('latestCheckup').textContent = checkupRec.length > 0 ? checkupRec[0].date : '无记录';
+
+      // 记录列表
+      const list = document.getElementById('healthRecordsList');
+      if (pet.healthRecords.length === 0) {
+        list.innerHTML = '<div style="text-align:center;padding:20px;color:#AAA">暂无健康记录</div>';
+        return;
+      }
+
+      const sorted = [...pet.healthRecords].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const typeMap = { vaccine: '💉 疫苗', deworm: '🪱 驱虫', checkup: '🏥 体检', note: '📝 备注' };
+
+      list.innerHTML = sorted.map(r => `
+        <div class="health-record-item type-${r.type}">
+          <div class="health-record-info">
+            <div class="record-type">${typeMap[r.type] || r.type}</div>
+            <div class="record-date">📅 ${r.date}</div>
+            ${r.notes ? `<div class="record-notes">${r.notes}</div>` : ''}
+          </div>
+          <button class="health-record-delete" onclick="deleteHealthRecord(${r.id})">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function addHealthRecord() {
+      const pet = pets.find(p => p.id === healthPetId);
+      if (!pet) return;
+
+      const type = document.getElementById('recordType').value;
+      const date = document.getElementById('recordDate').value;
+      const notes = document.getElementById('recordNotes').value.trim();
+
+      if (!date) { alert('请选择日期'); return; }
+
+      const newId = pet.healthRecords.length > 0 ? Math.max(...pet.healthRecords.map(r => r.id)) + 1 : 1;
+      pet.healthRecords.push({
+        id: newId,
+        type: type,
+        date: date,
+        notes: notes,
+        createdAt: new Date().toISOString()
+      });
+
+      savePets();
+      renderHealthRecords(pet);
+      renderPets();
+
+      document.getElementById('recordDate').value = '';
+      document.getElementById('recordNotes').value = '';
+      showToast('📋 健康记录已添加');
+    }
+
+    function deleteHealthRecord(recordId) {
+      if (!confirm('确定要删除这条健康记录吗？')) return;
+      const pet = pets.find(p => p.id === healthPetId);
+      if (!pet) return;
+      pet.healthRecords = pet.healthRecords.filter(r => r.id !== recordId);
+      savePets();
+      renderHealthRecords(pet);
+    }
+
+    // ==================== 宠物CRUD ====================
     function deletePet(id) {
       if (!confirm('确定要删除这只宠物吗？')) return;
-      
       pets = pets.filter(p => p.id !== id);
-      savePets();
-      filterPets(searchInput.value.toLowerCase(), currentCategory);
+      saveData();
+      filterPets(searchInput.value.toLowerCase(), currentCategory, currentHealthFilter);
       showToast('🗑️ 宠物已删除');
     }
 
-    // 打开模态框
     function openPetModal(pet = null) {
       editingPetId = pet ? pet.id : null;
       document.getElementById('modalTitle').textContent = pet ? '✏️ 编辑宠物' : '➕ 添加宠物';
-      
+
       if (pet) {
         document.getElementById('petId').value = pet.id;
         document.getElementById('petName').value = pet.name;
@@ -688,23 +1671,20 @@
         document.getElementById('petEmoji').value = '🐱';
         document.getElementById('petDesc').value = '';
       }
-      
+
       petModal.classList.add('active');
     }
 
-    // 关闭模态框
     function closePetModal() {
       petModal.classList.remove('active');
       editingPetId = null;
     }
 
-    // 编辑宠物
     function editPet(id) {
       const pet = pets.find(p => p.id === id);
       if (pet) openPetModal(pet);
     }
 
-    // 保存宠物
     function savePet() {
       const name = document.getElementById('petName').value.trim();
       const category = document.getElementById('petCategory').value;
@@ -712,17 +1692,10 @@
       const emoji = document.getElementById('petEmoji').value.trim() || '🐾';
       const desc = document.getElementById('petDesc').value.trim();
 
-      if (!name) {
-        alert('请输入宠物名字');
-        return;
-      }
-      if (!age) {
-        alert('请输入宠物年龄');
-        return;
-      }
+      if (!name) { alert('请输入宠物名字'); return; }
+      if (!age) { alert('请输入宠物年龄'); return; }
 
       if (editingPetId) {
-        // 编辑
         const pet = pets.find(p => p.id === editingPetId);
         if (pet) {
           pet.name = name;
@@ -733,8 +1706,7 @@
         }
         showToast('✏️ 宠物信息已更新');
       } else {
-        // 新增
-        const newId = Math.max(...pets.map(p => p.id), 0) + 1;
+        const newId = pets.length > 0 ? Math.max(...pets.map(p => p.id), 0) + 1 : 1;
         pets.push({
           id: newId,
           name,
@@ -742,21 +1714,23 @@
           emoji,
           age,
           desc,
-          adopted: false
+          adopted: false,
+          healthStatus: 'good',
+          healthRecords: []
         });
         showToast('➕ 新宠物已添加');
       }
 
-      savePets();
-      filterPets(searchInput.value.toLowerCase(), currentCategory);
+      saveData();
+      filterPets(searchInput.value.toLowerCase(), currentCategory, currentHealthFilter);
       closePetModal();
     }
 
-    // Toast提示
+    // ==================== Toast ====================
     function showToast(message) {
       const existing = document.querySelector('.toast');
       if (existing) existing.remove();
-      
+
       const toast = document.createElement('div');
       toast.className = 'toast';
       toast.textContent = message;
@@ -764,30 +1738,7 @@
       setTimeout(() => toast.remove(), 2000);
     }
 
-    // 本地存储
-    function savePets() {
-      try {
-        localStorage.setItem('petShopData', JSON.stringify(pets));
-      } catch (e) {
-        console.warn('保存失败:', e);
-      }
-    }
-
-    function loadPets() {
-      try {
-        const saved = localStorage.getItem('petShopData');
-        if (saved) {
-          pets = JSON.parse(saved);
-        } else {
-          pets = [...PETS];
-        }
-      } catch (e) {
-        pets = [...PETS];
-      }
-      filteredPets = [...pets];
-    }
-
-    // 启动
+    // ==================== 启动 ====================
     init();
   </script>
 </body>
