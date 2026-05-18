@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>零食铺子 - 美味零食一网打尽</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- 头部导航 -->
+  <header class="header">
+    <div class="logo">🍿 零食铺子</div>
+    <button class="cart-btn" id="openCartBtn">
+      购物车 <span class="cart-badge" id="cartBadge" style="display:none">0</span>
+    </button>
+  </header>
+
+  <!-- 搜索和筛选 -->
+  <div class="toolbar">
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="搜索零食...">
+    </div>
+    <button class="filter-btn active" data-category="全部">全部</button>
+    <button class="filter-btn" data-category="膨化">膨化</button>
+    <button class="filter-btn" data-category="烘焙">烘焙</button>
+    <button class="filter-btn" data-category="糖果">糖果</button>
+    <button class="filter-btn" data-category="坚果">坚果</button>
+    <button class="filter-btn" data-category="肉干">肉干</button>
+    <button class="filter-btn" data-category="饮品">饮品</button>
+    <button class="filter-btn" data-category="冷饮">冷饮</button>
+    <button class="filter-btn" data-category="果干">果干</button>
+  </div>
+
+  <!-- 商品列表 -->
+  <div class="container">
+    <div class="products-grid" id="productsGrid">
+      <!-- 商品由JS渲染 -->
+    </div>
+  </div>
+
+  <!-- 购物车遮罩 -->
+  <div class="cart-overlay" id="cartOverlay"></div>
+
+  <!-- 购物车侧边栏 -->
+  <div class="cart-drawer" id="cartDrawer">
+    <!-- 购物车视图 -->
+    <div id="cartView">
+      <div class="cart-header">
+        <h2>🛒 购物车</h2>
+        <button class="close-btn" id="closeCartBtn">✕</button>
+      </div>
+      <div class="cart-items" id="cartItems">
+        <!-- 购物车内容由JS渲染 -->
+      </div>
+      <div class="cart-footer">
+        <div class="cart-total">
+          <span>合计</span>
+          <span class="cart-total-price" id="cartTotalPrice">¥0.00</span>
+        </div>
+        <button class="checkout-btn" id="checkoutBtn" disabled>去结算</button>
+      </div>
+    </div>
+
+    <!-- 结算表单 -->
+    <div class="checkout-form" id="checkoutForm">
+      <h2 style="padding:20px;color:var(--primary);">📝 填写订单</h2>
+      <div style="padding:0 20px;">
+        <div class="form-group">
+          <label>收货人</label>
+          <input type="text" id="buyerName" placeholder="请输入姓名">
+        </div>
+        <div class="form-group">
+          <label>手机号</label>
+          <input type="tel" id="buyerPhone" placeholder="请输入手机号">
+        </div>
+        <div class="form-group">
+          <label>收货地址</label>
+          <input type="text" id="buyerAddress" placeholder="请输入详细地址">
+        </div>
+        <div class="form-actions">
+          <button class="back-btn" id="backToCartBtn">返回</button>
+          <button class="submit-order-btn" id="submitOrderBtn">提交订单</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 订单成功 -->
+    <div class="order-success" id="orderSuccess">
+      <div class="success-icon">🎉</div>
+      <h2 style="color:var(--accent);margin-bottom:10px;">下单成功！</h2>
+      <p>感谢您的购买，零食正在打包中~</p>
+      <div class="order-id">
+        <div class="order-id-label">订单号</div>
+        <div class="order-id-value" id="orderIdValue">--</div>
+      </div>
+      <p style="color:#888;font-size:0.9rem;">页面即将返回...</p>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
