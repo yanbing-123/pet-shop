@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>宠物管理系统 - 萌宠家园</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --primary: #6C5CE7;
+      --secondary: #A29BFE;
+      --accent: #00CEC9;
+      --bg: #F8F9FF;
+      --card-bg: #FFFFFF;
+      --text: #2D3436;
+      --shadow: rgba(108, 92, 231, 0.15);
+      --danger: #FF6B6B;
+      --success: #00B894;
+    }
+    
+    body {
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    
+    /* 头部 */
+    .header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      padding: 18px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .logo {
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .add-pet-btn {
+      background: white;
+      color: var(--primary);
+      border: none;
+      padding: 12px 24px;
+      border-radius: 25px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .add-pet-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    /* 搜索工具栏 */
+    .toolbar {
+      padding: 20px 30px;
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .search-box {
+      flex: 1;
+      min-width: 250px;
+      position: relative;
+    }
+    
+    .search-box input {
+      width: 100%;
+      padding: 12px 20px 12px 45px;
+      border: 2px solid #EEE;
+      border-radius: 25px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+    
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    .search-box::before {
+      content: "🔍";
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    
+    .filter-btn {
+      background: white;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+    
+    .filter-btn.active,
+    .filter-btn:hover {
+      background: var(--primary);
+      color: white;
+    }
+    
+    /* 宠物卡片网格 */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 30px;
+    }
+    
+    .pets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 25px;
+    }
+    
+    .pet-card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 5px 20px var(--shadow);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .pet-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 30px var(--shadow);
+    }
+    
+    .pet-image {
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+      background: linear-gradient(135deg, #F0EBFF, #E8E4FF);
+    }
+    
+    .pet-card.adopted .pet-image {
+      background: linear-gradient(135deg, #FFF5F5, #FFE8E8);
+    }
+    
+    .pet-info {
+      padding: 20px;
+    }
+    
+    .pet-name {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .pet-status {
+      font-size: 0.75rem;
+      padding: 3px 10px;
+      border-radius: 15px;
+      font-weight: 500;
+    }
+    
+    .status-available {
+      background: #E8FFF5;
+      color: var(--success);
+    }
+    
+    .status-adopted {
+      background: #FFE8E8;
+      color: var(--danger);
+    }
+    
+    .pet-desc {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 12px;
+    }
+    
+    .pet-meta {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      font-size: 0.85rem;
+      color: #666;
+    }
+    
+    .pet-meta span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .pet-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .adopt-btn {
+      flex: 1;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .adopt-btn:hover {
+      background: #5B4BD5;
+    }
+    
+    .adopt-btn:disabled {
+      background: #CCC;
+      cursor: not-allowed;
+    }
+    
+    .return-btn {
+      flex: 1;
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .return-btn:hover {
+      background: #00B5AF;
+    }
+    
+    .edit-btn {
+      background: #74B9FF;
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+    
+    .delete-btn {
+      background: var(--danger);
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      grid-column: 1 / -1;
+    }
+    
+    .empty-icon {
+      font-size: 5rem;
+      margin-bottom: 15px;
+    }
+    
+    .empty-text {
+      font-size: 1.1rem;
+      color: #AAA;
+    }
+    
+    /* 模态框 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .modal-overlay.active {
+      display: flex;
+    }
+    
+    .modal {
+      background: white;
+      border-radius: 20px;
+      width: 450px;
+      max-width: 90%;
+      overflow: hidden;
+    }
+    
+    .modal-header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-header h2 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .modal-close {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    
+    .modal-body {
+      padding: 25px;
+    }
+    
+    .form-group {
+      margin-bottom: 18px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #EEE;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-family: inherit;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 25px;
+    }
+    
+    .cancel-btn {
+      flex: 1;
+      background: #EEE;
+      color: var(--text);
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    
+    .save-btn {
+      flex: 2;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 12px 25px;
+      border-radius: 25px;
+      font-size: 0.95rem;
+      z-index: 9999;
+      animation: toastFade 2s ease forwards;
+    }
+    
+    @keyframes toastFade {
+      0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+      85% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+    
+    /* 动画 */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .pet-card {
+      animation: fadeIn 0.4s ease forwards;
+    }
+    
+    /* 响应式 */
+    @media (max-width: 768px) {
+      .header { padding: 12px 20px; }
+      .logo { font-size: 1.3rem; }
+      .toolbar { padding: 15px 20px; }
+      .container { padding: 15px 20px; }
+      .pets-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 头部 -->
+  <header class="header">
+    <div class="logo">🐾 宠物管理系统</div>
+    <button class="add-pet-btn" onclick="openPetModal()">
+      ➕ 添加宠物
+    </button>
+  </header>
+
+  <!-- 搜索筛选 -->
+  <div class="toolbar">
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="搜索宠物名字...">
+    </div>
+    <button class="filter-btn active" data-category="全部">全部</button>
+    <button class="filter-btn" data-category="猫">🐱 猫</button>
+    <button class="filter-btn" data-category="狗">🐶 狗</button>
+    <button class="filter-btn" data-category="兔">🐰 兔</button>
+    <button class="filter-btn" data-category="鸟">🐦 鸟</button>
+    <button class="filter-btn" data-category="鱼">🐟 鱼</button>
+  </div>
+
+  <!-- 宠物列表 -->
+  <div class="container">
+    <div class="pets-grid" id="petsGrid"></div>
+  </div>
+
+  <!-- 添加/编辑模态框 -->
+  <div class="modal-overlay" id="petModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalTitle">➕ 添加宠物</h2>
+        <button class="modal-close" onclick="closePetModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="petId">
+        <div class="form-group">
+          <label>名字</label>
+          <input type="text" id="petName" placeholder="输入宠物名字">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>类型</label>
+            <select id="petCategory">
+              <option value="猫">🐱 猫</option>
+              <option value="狗">🐶 狗</option>
+              <option value="兔">🐰 兔</option>
+              <option value="鸟">🐦 鸟</option>
+              <option value="鱼">🐟 鱼</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>年龄</label>
+            <input type="text" id="petAge" placeholder="如：2岁">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>emoji图标</label>
+          <input type="text" id="petEmoji" placeholder="如：🐱">
+        </div>
+        <div class="form-group">
+          <label>描述</label>
+          <textarea id="petDesc" rows="3" placeholder="描述宠物特点..."></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="cancel-btn" onclick="closePetModal()">取消</button>
+          <button class="save-btn" onclick="savePet()">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 宠物数据
+    const PETS = [
+      { id: 1, name: '小白', category: '猫', emoji: '🐱', age: '2岁', desc: '温顺乖巧，喜欢晒太阳', adopted: false },
+      { id: 2, name: '旺财', category: '狗', emoji: '🐶', age: '3岁', desc: '活泼好动，忠诚友善', adopted: false },
+      { id: 3, name: '绒球', category: '兔', emoji: '🐰', age: '1岁', desc: '毛茸茸的，非常可爱', adopted: false },
+      { id: 4, name: '鹦鹉', category: '鸟', emoji: '🦜', age: '2岁', desc: '会说话，聪明伶俐', adopted: false },
+      { id: 5, name: '小金', category: '鱼', emoji: '🐟', age: '1岁', desc: '金桔色，优雅游动', adopted: false },
+      { id: 6, name: '布丁', category: '猫', emoji: '🐱', age: '1岁', desc: '布偶猫，优雅安静', adopted: false },
+      { id: 7, name: '豆豆', category: '狗', emoji: '🐶', age: '2岁', desc: '柯基犬，小短腿', adopted: false },
+      { id: 8, name: '雪球', category: '兔', emoji: '🐰', age: '1岁', desc: '白色长毛，呆萌呆萌', adopted: false }
+    ];
+
+    let pets = [];
+    let filteredPets = [];
+    let currentCategory = '全部';
+    let editingPetId = null;
+
+    // DOM
+    const petsGrid = document.getElementById('petsGrid');
+    const petModal = document.getElementById('petModal');
+    const searchInput = document.getElementById('searchInput');
+
+    // 初始化
+    function init() {
+      loadPets();
+      renderPets();
+      bindEvents();
+    }
+
+    // 事件绑定
+    function bindEvents() {
+      searchInput.addEventListener('input', handleSearch);
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => handleFilter(btn.dataset.category));
+      });
+    }
+
+    // 渲染宠物列表
+    function renderPets() {
+      if (filteredPets.length === 0) {
+        petsGrid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🐾</div>
+            <p class="empty-text">暂无宠物，去添加一只吧~</p>
+          </div>
+        `;
+        return;
+      }
+
+      petsGrid.innerHTML = filteredPets.map((pet, i) => `
+        <div class="pet-card ${pet.adopted ? 'adopted' : ''}" style="animation-delay: ${i * 0.05}s">
+          <div class="pet-image">${pet.emoji}</div>
+          <div class="pet-info">
+            <div class="pet-name">
+              ${pet.name}
+              <span class="pet-status ${pet.adopted ? 'status-adopted' : 'status-available'}">
+                ${pet.adopted ? '已领养' : '待领养'}
+              </span>
+            </div>
+            <div class="pet-desc">${pet.desc}</div>
+            <div class="pet-meta">
+              <span>📅 ${pet.age}</span>
+              <span>🏷️ ${pet.category}</span>
+            </div>
+            <div class="pet-actions">
+              ${pet.adopted 
+                ? `<button class="return-btn" onclick="returnPet(${pet.id})">🏠 归还</button>`
+                : `<button class="adopt-btn" onclick="adoptPet(${pet.id})">🤝 领养</button>`
+              }
+              <button class="edit-btn" onclick="editPet(${pet.id})">✏️</button>
+              <button class="delete-btn" onclick="deletePet(${pet.id})">🗑️</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 搜索
+    function handleSearch(e) {
+      const keyword = e.target.value.toLowerCase();
+      filterPets(keyword, currentCategory);
+    }
+
+    // 筛选分类
+    function handleFilter(category) {
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.category === category);
+      });
+      currentCategory = category;
+      filterPets(searchInput.value.toLowerCase(), category);
+    }
+
+    function filterPets(keyword, category) {
+      filteredPets = pets.filter(p => {
+        const matchKeyword = p.name.toLowerCase().includes(keyword);
+        const matchCategory = category === '全部' || p.category === category;
+        return matchKeyword && matchCategory;
+      });
+      renderPets();
+    }
+
+    // 领养宠物
+    function adoptPet(id) {
+      const pet = pets.find(p => p.id === id);
+      if (!pet) return;
+      
+      if (pet.adopted) {
+        alert('这只宠物已经被领养了！');
+        return false;
+      }
+      
+      pet.adopted = true;
+      savePets();
+      renderPets();
+      showToast(`🎉 ${pet.name} 被领养成功！`);
+      return true;
+    }
+
+    // 归还宠物
+    function returnPet(id) {
+      const pet = pets.find(p => p.id === id);
+      if (!pet) return;
+      
+      pet.adopted = false;
+      savePets();
+      renderPets();
+      showToast(`🏠 ${pet.name} 已归还宠物店`);
+    }
+
+    // 删除宠物
+    function deletePet(id) {
+      if (!confirm('确定要删除这只宠物吗？')) return;
+      
+      pets = pets.filter(p => p.id !== id);
+      savePets();
+      filterPets(searchInput.value.toLowerCase(), currentCategory);
+      showToast('🗑️ 宠物已删除');
+    }
+
+    // 打开模态框
+    function openPetModal(pet = null) {
+      editingPetId = pet ? pet.id : null;
+      document.getElementById('modalTitle').textContent = pet ? '✏️ 编辑宠物' : '➕ 添加宠物';
+      
+      if (pet) {
+        document.getElementById('petId').value = pet.id;
+        document.getElementById('petName').value = pet.name;
+        document.getElementById('petCategory').value = pet.category;
+        document.getElementById('petAge').value = pet.age;
+        document.getElementById('petEmoji').value = pet.emoji;
+        document.getElementById('petDesc').value = pet.desc;
+      } else {
+        document.getElementById('petId').value = '';
+        document.getElementById('petName').value = '';
+        document.getElementById('petCategory').value = '猫';
+        document.getElementById('petAge').value = '';
+        document.getElementById('petEmoji').value = '🐱';
+        document.getElementById('petDesc').value = '';
+      }
+      
+      petModal.classList.add('active');
+    }
+
+    // 关闭模态框
+    function closePetModal() {
+      petModal.classList.remove('active');
+      editingPetId = null;
+    }
+
+    // 编辑宠物
+    function editPet(id) {
+      const pet = pets.find(p => p.id === id);
+      if (pet) openPetModal(pet);
+    }
+
+    // 保存宠物
+    function savePet() {
+      const name = document.getElementById('petName').value.trim();
+      const category = document.getElementById('petCategory').value;
+      const age = document.getElementById('petAge').value.trim();
+      const emoji = document.getElementById('petEmoji').value.trim() || '🐾';
+      const desc = document.getElementById('petDesc').value.trim();
+
+      if (!name) {
+        alert('请输入宠物名字');
+        return;
+      }
+      if (!age) {
+        alert('请输入宠物年龄');
+        return;
+      }
+
+      if (editingPetId) {
+        // 编辑
+        const pet = pets.find(p => p.id === editingPetId);
+        if (pet) {
+          pet.name = name;
+          pet.category = category;
+          pet.age = age;
+          pet.emoji = emoji;
+          pet.desc = desc;
+        }
+        showToast('✏️ 宠物信息已更新');
+      } else {
+        // 新增
+        const newId = Math.max(...pets.map(p => p.id), 0) + 1;
+        pets.push({
+          id: newId,
+          name,
+          category,
+          emoji,
+          age,
+          desc,
+          adopted: false
+        });
+        showToast('➕ 新宠物已添加');
+      }
+
+      savePets();
+      filterPets(searchInput.value.toLowerCase(), currentCategory);
+      closePetModal();
+    }
+
+    // Toast提示
+    function showToast(message) {
+      const existing = document.querySelector('.toast');
+      if (existing) existing.remove();
+      
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2000);
+    }
+
+    // 本地存储
+    function savePets() {
+      try {
+        localStorage.setItem('petShopData', JSON.stringify(pets));
+      } catch (e) {
+        console.warn('保存失败:', e);
+      }
+    }
+
+    function loadPets() {
+      try {
+        const saved = localStorage.getItem('petShopData');
+        if (saved) {
+          pets = JSON.parse(saved);
+        } else {
+          pets = [...PETS];
+        }
+      } catch (e) {
+        pets = [...PETS];
+      }
+      filteredPets = [...pets];
+    }
+
+    // 启动
+    init();
+  </script>
+</body>
+</html>
