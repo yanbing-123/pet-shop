@@ -48,7 +48,8 @@
       gap: 10px;
     }
     
-    .add-pet-btn {
+    .add-pet-btn,
+    .stats-btn {
       background: white;
       color: var(--primary);
       border: none;
@@ -62,10 +63,19 @@
       gap: 8px;
       transition: transform 0.2s, box-shadow 0.2s;
     }
-    
-    .add-pet-btn:hover {
+
+    .add-pet-btn:hover,
+    .stats-btn:hover {
       transform: scale(1.05);
       box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .stats-btn {
+      background: rgba(255,255,255,0.2);
+      color: white;
+    }
+    .stats-btn:hover {
+      background: rgba(255,255,255,0.35);
     }
     
     /* 搜索工具栏 */
@@ -434,6 +444,142 @@
       100% { opacity: 0; }
     }
     
+    /* 统计看板样式 */
+    .stats-dashboard {
+      width: 680px;
+      max-width: 95%;
+      background: var(--bg);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    .stats-header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 20px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .stats-header h2 { display: flex; align-items: center; gap: 8px; }
+    .stats-body { padding: 25px; max-height: 70vh; overflow-y: auto; }
+
+    .stats-summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+      box-shadow: 0 2px 10px var(--shadow);
+    }
+    .stat-card .stat-number {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .stat-card .stat-label {
+      font-size: 0.8rem;
+      color: #999;
+      margin-top: 4px;
+    }
+    .stat-card.adopted .stat-number { color: var(--danger); }
+    .stat-card.available .stat-number { color: var(--success); }
+    .stat-card.categories .stat-number { color: var(--accent); }
+
+    .stats-section {
+      background: white;
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 10px var(--shadow);
+    }
+    .stats-section h3 {
+      font-size: 1rem;
+      margin-bottom: 14px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chart-bar-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .chart-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .chart-bar-label {
+      width: 40px;
+      font-size: 1.3rem;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .chart-bar-name {
+      width: 30px;
+      font-size: 0.85rem;
+      color: #666;
+      flex-shrink: 0;
+    }
+    .chart-bar-track {
+      flex: 1;
+      height: 22px;
+      background: #F0EBFF;
+      border-radius: 11px;
+      overflow: hidden;
+    }
+    .chart-bar-fill {
+      height: 100%;
+      border-radius: 11px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      transition: width 0.6s ease;
+      display: flex;
+      align-items: center;
+      padding-left: 10px;
+      font-size: 0.75rem;
+      color: white;
+      font-weight: 600;
+    }
+    .chart-bar-fill.adopted-fill {
+      background: linear-gradient(90deg, var(--danger), #FF8E8E);
+    }
+
+    .activity-list {
+      max-height: 180px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .activity-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 10px;
+      background: var(--bg);
+      border-radius: 8px;
+      font-size: 0.85rem;
+    }
+    .activity-item .act-time {
+      color: #aaa;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+      margin-left: 10px;
+    }
+    .activity-empty {
+      text-align: center;
+      color: #ccc;
+      padding: 20px;
+      font-size: 0.9rem;
+    }
+
     /* 动画 */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
@@ -452,6 +598,10 @@
       .container { padding: 15px 20px; }
       .pets-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
       .form-row { grid-template-columns: 1fr; }
+      .stats-summary { grid-template-columns: repeat(2, 1fr); }
+      .stats-dashboard { width: 100%; border-radius: 0; }
+      .header .add-pet-btn,
+      .header .stats-btn { padding: 8px 14px; font-size: 0.85rem; }
     }
   </style>
 </head>
@@ -460,9 +610,14 @@
   <!-- 头部 -->
   <header class="header">
     <div class="logo">🐾 宠物管理系统</div>
-    <button class="add-pet-btn" onclick="openPetModal()">
-      ➕ 添加宠物
-    </button>
+    <div style="display:flex;gap:10px">
+      <button class="stats-btn" onclick="openStats()">
+        📊 数据统计
+      </button>
+      <button class="add-pet-btn" onclick="openPetModal()">
+        ➕ 添加宠物
+      </button>
+    </div>
   </header>
 
   <!-- 搜索筛选 -->
@@ -528,7 +683,39 @@
     </div>
   </div>
 
+  <!-- 统计看板模态框 -->
+  <div class="modal-overlay" id="statsModal">
+    <div class="stats-dashboard">
+      <div class="stats-header">
+        <h2>📊 数据统计</h2>
+        <button class="modal-close" onclick="closeStats()">✕</button>
+      </div>
+      <div class="stats-body" id="statsBody"></div>
+    </div>
+  </div>
+
   <script>
+    // 活动记录
+    let activities = [];
+    const ACTIVITY_KEY = 'petShopActivity';
+
+    function logActivity(type, petName) {
+      activities.unshift({
+        type,
+        petName,
+        time: new Date().toISOString()
+      });
+      if (activities.length > 50) activities.length = 50;
+      try { localStorage.setItem(ACTIVITY_KEY, JSON.stringify(activities)); } catch (e) {}
+    }
+
+    function loadActivities() {
+      try {
+        const saved = localStorage.getItem(ACTIVITY_KEY);
+        if (saved) activities = JSON.parse(saved);
+      } catch (e) { activities = []; }
+    }
+
     // 宠物数据
     const PETS = [
       { id: 1, name: '小白', category: '猫', emoji: '🐱', age: '2岁', desc: '温顺乖巧，喜欢晒太阳', adopted: false },
@@ -554,6 +741,7 @@
     // 初始化
     function init() {
       loadPets();
+      loadActivities();
       renderPets();
       bindEvents();
     }
@@ -643,6 +831,7 @@
       pet.adopted = true;
       savePets();
       renderPets();
+      logActivity('adopt', pet.name);
       showToast(`🎉 ${pet.name} 被领养成功！`);
       return true;
     }
@@ -655,6 +844,7 @@
       pet.adopted = false;
       savePets();
       renderPets();
+      logActivity('return', pet.name);
       showToast(`🏠 ${pet.name} 已归还宠物店`);
     }
 
@@ -662,9 +852,11 @@
     function deletePet(id) {
       if (!confirm('确定要删除这只宠物吗？')) return;
       
+      const deleted = pets.find(p => p.id === id);
       pets = pets.filter(p => p.id !== id);
       savePets();
       filterPets(searchInput.value.toLowerCase(), currentCategory);
+      if (deleted) logActivity('delete', deleted.name);
       showToast('🗑️ 宠物已删除');
     }
 
@@ -725,11 +917,14 @@
         // 编辑
         const pet = pets.find(p => p.id === editingPetId);
         if (pet) {
+          const oldName = pet.name;
           pet.name = name;
           pet.category = category;
           pet.age = age;
           pet.emoji = emoji;
           pet.desc = desc;
+          if (oldName !== name) logActivity('edit', `${oldName} → ${name}`);
+          else logActivity('edit', name);
         }
         showToast('✏️ 宠物信息已更新');
       } else {
@@ -744,6 +939,7 @@
           desc,
           adopted: false
         });
+        logActivity('add', name);
         showToast('➕ 新宠物已添加');
       }
 
@@ -762,6 +958,121 @@
       toast.textContent = message;
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), 2000);
+    }
+
+    // 打开/关闭统计看板
+    function openStats() {
+      renderStats();
+      document.getElementById('statsModal').classList.add('active');
+    }
+    function closeStats() {
+      document.getElementById('statsModal').classList.remove('active');
+    }
+
+    // 渲染统计看板
+    function renderStats() {
+      const total = pets.length;
+      const adopted = pets.filter(p => p.adopted).length;
+      const available = total - adopted;
+      const categories = [...new Set(pets.map(p => p.category))];
+
+      // 按分类统计
+      const catCounts = {};
+      pets.forEach(p => {
+        catCounts[p.category] = (catCounts[p.category] || 0) + 1;
+      });
+      const maxCat = Math.max(...Object.values(catCounts), 1);
+
+      // 分类emoji映射
+      const catEmojis = { '猫': '🐱', '狗': '🐶', '兔': '🐰', '鸟': '🐦', '鱼': '🐟' };
+
+      // 活动图标
+      const actIcons = { adopt: '🤝', return: '🏠', add: '➕', delete: '🗑️', edit: '✏️' };
+      const actLabels = { adopt: '领养', return: '归还', add: '添加', delete: '删除', edit: '编辑' };
+
+      const now = new Date();
+      const fmtTime = (iso) => {
+        const d = new Date(iso);
+        const pad = n => String(n).padStart(2, '0');
+        return `${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      };
+
+      document.getElementById('statsBody').innerHTML = `
+        <!-- 概览卡片 -->
+        <div class="stats-summary">
+          <div class="stat-card">
+            <div class="stat-number">${total}</div>
+            <div class="stat-label">🐾 宠物总数</div>
+          </div>
+          <div class="stat-card available">
+            <div class="stat-number">${available}</div>
+            <div class="stat-label">✅ 待领养</div>
+          </div>
+          <div class="stat-card adopted">
+            <div class="stat-number">${adopted}</div>
+            <div class="stat-label">🏠 已领养</div>
+          </div>
+          <div class="stat-card categories">
+            <div class="stat-number">${categories.length}</div>
+            <div class="stat-label">📂 种类数</div>
+          </div>
+        </div>
+
+        <!-- 分类分布 -->
+        <div class="stats-section">
+          <h3>📊 宠物分类分布</h3>
+          <div class="chart-bar-group">
+            ${Object.entries(catCounts).map(([cat, count]) => `
+              <div class="chart-bar-row">
+                <div class="chart-bar-label">${catEmojis[cat] || '🐾'}</div>
+                <div class="chart-bar-name">${cat}</div>
+                <div class="chart-bar-track">
+                  <div class="chart-bar-fill" style="width:${(count/maxCat*100).toFixed(0)}%">${count}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- 领养状态 -->
+        ${total > 0 ? `
+        <div class="stats-section">
+          <h3>🏷️ 领养状态</h3>
+          <div class="chart-bar-group">
+            <div class="chart-bar-row">
+              <div class="chart-bar-label">✅</div>
+              <div class="chart-bar-name">待领养</div>
+              <div class="chart-bar-track">
+                <div class="chart-bar-fill" style="width:${(available/total*100).toFixed(0)}%">${available} (${(available/total*100).toFixed(0)}%)</div>
+              </div>
+            </div>
+            <div class="chart-bar-row">
+              <div class="chart-bar-label">🏠</div>
+              <div class="chart-bar-name">已领养</div>
+              <div class="chart-bar-track">
+                <div class="chart-bar-fill adopted-fill" style="width:${(adopted/total*100).toFixed(0)}%">${adopted} (${(adopted/total*100).toFixed(0)}%)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        ` : ''}
+
+        <!-- 最近动态 -->
+        <div class="stats-section">
+          <h3>🕐 最近动态</h3>
+          <div class="activity-list">
+            ${activities.length === 0
+              ? '<div class="activity-empty">暂无活动记录</div>'
+              : activities.slice(0, 15).map(a => `
+                <div class="activity-item">
+                  <span>${actIcons[a.type] || '📌'} ${actLabels[a.type] || a.type} — ${a.petName}</span>
+                  <span class="act-time">${fmtTime(a.time)}</span>
+                </div>
+              `).join('')
+            }
+          </div>
+        </div>
+      `;
     }
 
     // 本地存储
